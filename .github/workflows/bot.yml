@@ -1,0 +1,53 @@
+name: slot-hunt-bot
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes (UTC)
+  workflow_dispatch: {}       # allow manual runs from the GitHub UI / mobile app
+
+# allow the job to commit updated state (active watches) back to the repo
+permissions:
+  contents: write
+
+concurrency:
+  group: slot-hunt-bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run bot
+        env:
+          PYTHONPATH: src
+          # --- session cookies (one per patient-scoped account) ---
+          APPT_COOKIES_ADI: ${{ secrets.APPT_COOKIES_ADI }}
+          APPT_COOKIES_NOYA: ${{ secrets.APPT_COOKIES_NOYA }}
+          APPT_COOKIES_TOMI: ${{ secrets.APPT_COOKIES_TOMI }}
+          # --- Twilio WhatsApp (two-way) ---
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
+          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+          TWILIO_WHATSAPP_TO: ${{ secrets.TWILIO_WHATSAPP_TO }}
+        run: python -m appointment_bot.main
+
+      - name: Persist active watches
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain state/)" ]; then
+            git config user.name  "slot-hunt-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add state/
+            git commit -m "state: update active watches [skip ci]"
+            git push
+          fi

@@ -1,0 +1,25 @@
+# Non-secret tunables. Secrets (cookies, Twilio) come from environment / GitHub Secrets.
+# Per-request preferences are NOT here — they arrive dynamically over WhatsApp.
+
+dry_run: true        # ⚠️ books NOTHING while true. Flip to false only after verifying.
+auto_book: true      # auto-book when there is no existing appointment
+poll_days_ahead: 14  # how many days forward to scan for an earlier slot
+
+base_url: __PROVIDER_BASE_URL__
+state_path: state/watches.json
+
+# One entry per provider account. The bot AUTO-LOGS-IN with stored credentials (no manual
+# cookie pasting, no CAPTCHA, no OTP) — set these env vars / secrets per account:
+#   APPT_ID_<NAME>        = ID number (ת"ז)
+#   APPT_USERCODE_<NAME>  = user code (קוד משתמש)
+#   APPT_PASSWORD_<NAME>  = password
+# (<NAME> = the account name uppercased, e.g. APPT_ID_ADI.)
+# A pasted cookie (APPT_COOKIES_<NAME>) still works as a fallback if creds aren't set.
+accounts:
+  - name: adi
+    patient: עדי          # chat requests "ל<עדי>" route to this account
+    cookies_secret: APPT_COOKIES_ADI   # optional fallback
+  # - name: noya
+  #   patient: נויה
+  # - name: tomi
+  #   patient: טומי

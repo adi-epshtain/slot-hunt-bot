@@ -1,0 +1,30 @@
+# Secrets & captured data — NEVER commit
+captures/
+*.cookies
+*.cookie
+.env
+.env.*
+secrets.env
+_creds.env
+secrets.yaml
+*.cURL
+*.curl
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# IDE / OS
+.idea/
+.vscode/
+.claude/
+.DS_Store
+Thumbs.db
+
+# local-only working notes (full reverse-engineering detail)
+PLAN.local.md
